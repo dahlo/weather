@@ -1,43 +1,39 @@
 #!/bin/env R
 
-library('XML')
+library(httr)
+library(jsonlite)
 
 # read the arguments
 args <- commandArgs(trailingOnly = TRUE)
-weather_url = args[1]
-outfile = args[2]
+lat = args[1]
+lon = args[2]
+outfile = args[3]
 outfile_dim_x = 264
 outfile_dim_y = 176
 
-# weather_url = "http://www.yr.no/sted/Norge/Hordaland/Bergen/Bergen/forecast_hour_by_hour.xml"
-# outfile = "current_weather.png"
+if( is.na(outfile) ){
+    outfile = 'current_weather.png'
+}
+
+lat = "59.857958"
+lon = "17.637296"
+outfile = "current_weather.png"
 
 # get the forecast
-data = xmlParse(weather_url)
-# data = xmlParse("http://www.yr.no/sted/Sverige/Uppsala/Uppsala/forecast_hour_by_hour.xml")
-# data = xmlParse("http://www.yr.no/sted/Norge/S%C3%B8r-Tr%C3%B8ndelag/Trondheim/Trondheim/forecast_hour_by_hour.xml")
-data = xmlToList(data)
+url  = paste0("https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=", lat, "&lon=", lon)
+res  = GET(url)
+json = rawToChar(res$content)
+data_raw = fromJSON(json)
 
-# init
-date = list()
-temperature = list()
-precipitation = list()
+data = data.frame(data_raw$properties$timeseries$time, data_raw$properties$timeseries$data$instant$details$air_temperature, data_raw$properties$timeseries$data$instant$details$cloud_area_fraction, data_raw$properties$timeseries$data$next_1_hours$details$precipitation_amount)
+colnames(data) = c("time", "temperature", "cloud_area", "rain")
 
-# convert it to a data.frame (how stupid is this?!)
-for(i in 1:26){
-	date = cbind(date, data$forecast$tabular[[i]]$.attrs[[1]])
-	temperature = cbind(temperature, as.numeric(data$forecast$tabular[[i]]$temperature[2]))
-	if(is.na(data$forecast$tabular[[i]]$precipitation[3])){
-		precipitation = cbind(precipitation, as.numeric(data$forecast$tabular[[i]]$precipitation[1]))
-	}else{
-		precipitation = cbind(precipitation, as.numeric(data$forecast$tabular[[i]]$precipitation[3]))
-	}
+# convert time column to time objects
+data$time = strptime(data$time, format='%Y-%M-%dT%H:%M:%SZ')
 
-	
-}
-date = strptime(date, "%Y-%m-%dT%H:%M:%s")
-temperature = unlist(temperature)
-precipitation = unlist(precipitation)
+# limit data to the coming 24h
+data = data[1:26,]
+
 
 ### plot the data
 
@@ -48,33 +44,33 @@ png(file=outfile, width=outfile_dim_x, height=outfile_dim_y)
 par(mar=c(1.5,1.7,1.3,1))
 
 # plot the precipitation
-barplot(precipitation, xlab='', ylab='', bty='n', ylim=c(0, 3), axes=F, border=FALSE, col='#888888')
+barplot(data$rain, xlab='', ylab='', bty='n', ylim=c(0, 3), axes=F, border=FALSE, col='#888888')
 
 # plot the line on top of the boxes
 par(new=TRUE)
 
 # init plot surface
-plot(1:length(date$hour),temperature, type='n', xlab='', ylab='', bty='n', ylim=c(min(temperature)-(max(temperature)-min(temperature))*0.2, max(temperature)), axes=F)
+plot(1:length(data$time), data$temperature, type='n', xlab='', ylab='', bty='n', ylim=c(min(data$temperature)-(max(data$temperature)-min(data$temperature))*0.2, max(data$temperature)), axes=F)
 
 # plot the temperature line
-lines(1:length(date$hour),temperature, col='black', lwd=3)
+lines(1:length(data$time),data$temperature, col='black', lwd=3)
 
 
 # plot the X axis
-xlabels = c("", sprintf("%02d", date$hour[date$hour%%6==0]), "")
-xat = c(0, which(date$hour%%6==0), length(temperature))
+xlabels = c("", sprintf("%02d", data$time$hour[data$time$hour%%6==0]), "")
+xat = c(0, which(data$time$hour%%6==0), length(data$temperature))
 axis(side=1, at=xat, labels=xlabels, lwd=3, lend=1, cex.axis=1, padj=-0.8)
 
 
 # plot the Y axis
-yat = c(min(temperature)-(max(temperature)-min(temperature))*0.248, as.integer(seq(min(temperature), max(temperature), length.out=3)), max(temperature))
-ylabels = c("", as.integer(seq(min(temperature), max(temperature), length.out=3)), "")
+yat = c(min(data$temperature)-(max(data$temperature)-min(data$temperature))*0.248, as.integer(seq(min(data$temperature), max(data$temperature), length.out=3)), max(data$temperature))
+ylabels = c("", as.integer(seq(min(data$temperature), max(data$temperature), length.out=3)), "")
 axis(side=2, at=yat, labels=ylabels, lwd=3, lend=1, cex.axis=1, padj=0.5, las=1, hadj=0.63)
 
 
 
 # add axis text
-mtext("24h Forecast of Uppsala", 3, font=2, cex=1, padj=0, adj=0.3)
+mtext("24h Forecast", 3, font=2, cex=1, padj=0, adj=0.5)
 mtext(strftime(Sys.time(), "%y%m%d"), 3, font=2, cex=1, padj=0, adj=1.03)
 mtext("t", 1, padj=0, adj=1.04)
 mtext(expression(~degree~C), 2, padj=-8, adj=1.1, las=1, cex=1.05)
@@ -83,5 +79,9 @@ mtext(expression(~degree~C), 2, padj=-8, adj=1.1, las=1, cex=1.05)
 
 
 dev.off()
+
+
+
+
 
 
