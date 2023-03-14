@@ -25,7 +25,19 @@ The installation script from the manufacturer did not work on my newly installed
 
 Use a map service, like [Google maps](https://www.google.com/maps) and find where you want to forecast the weather. If you click on a blank area on the map you will get a small box at the bottom of the map that displays the longitude and latitude of the point where you have clicked (e.g. [59.857958, 17.637296](https://goo.gl/maps/1n6ts7yJdZdySrAC7)).
  
+# Install dependencies
 
+A part from installing the drivers for the display, the python script only requires `Pillow`.
+
+```bash
+pip install Pillow
+```
+
+and the R script only needs `httr` and `jsonlite`.
+
+```r
+install.packages(c("httr", "jsonlite"))
+```
 
 
 

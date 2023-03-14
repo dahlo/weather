@@ -1,2 +1,3 @@
 current_weather.png
 *.sw*
+__pycache__
