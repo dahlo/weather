@@ -7,9 +7,13 @@ I have an e-ink display from [Percheron Electronics](https://www.percheron-elect
 There are two scripts used; an R script to generate the forecast image, and a Python script to display the image on the e-ink display.
 
 1. Generate the forecast image by giving the longitude and latitude to where you want to forecast:
-    Rscript generate_image.r 59.857958 17.637296
+```bash
+Rscript generate_image.r 59.857958 17.637296
+```
 2. Display the image on the e-ink display:
-    python display_image.py current_weather.png
+```bash
+python display_image.py current_weather.png
+```
 
 # First time setup
 
