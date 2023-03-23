@@ -32,7 +32,7 @@ def main(filename, rotation_degrees=None):
 
     # if rotation
     if rotation_degrees:
-        image.rotate(rotation_degrees)
+        image = image.rotate(rotation_degrees)
 
     # convert to 8-bit format
     bw = image.convert("1", dither=Image.FLOYDSTEINBERG)
