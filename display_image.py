@@ -21,7 +21,7 @@ from PIL import ImageOps
 from EPD import EPD
 
 
-def main(argv):
+def main(filename, rotation_degrees=None):
     """main program - display image"""
 
     # print('panel = {p:s} {w:d} x {h:d}  version={v:s} COG={g:d} FILM={f:d}'.format(p=epd.panel, w=epd.width, h=epd.height, v=epd.version, g=epd.cog, f=epd.film))
@@ -29,6 +29,10 @@ def main(argv):
     # open image and convert to grayscale
     image = Image.open(sys.argv[1])
     image = ImageOps.grayscale(image)
+
+    # if rotation
+    if rotation_degrees:
+        image.rotate(rotation_degrees)
 
     # convert to 8-bit format
     bw = image.convert("1", dither=Image.FLOYDSTEINBERG)
@@ -41,6 +45,17 @@ def main(argv):
 
 # main
 if "__main__" == __name__:
-    if len(sys.argv) < 2:
-        sys.exit('usage: {p:s} image-file'.format(p=sys.argv[0]))
-    main(sys.argv[1:])
+    
+    # get file name
+    try:
+        filename = sys.argv[1]
+    except IndexError:
+        sys.exit(f'Usage: {sys.argv[0]} <image path> [<degrees to rotate image>]')
+
+
+    # get optional argument if present
+    try:
+        main(filename, int(sys.argv[2]))
+    except IndexError:
+        main(filename)
+
