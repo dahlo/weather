@@ -1,4 +1,4 @@
-# Weather forecase on E-ink display
+# Weather forecase on E-ink display 
 
 I have an e-ink display from [Percheron Electronics](https://www.percheron-electronics.uk/). It seems to be similar to the [PaPiRus](https://github.com/PiSupply/PaPiRus), but I have not tried to use their software to run my display. These scripts will fetch a weather forecast from [met.no Locationforecast API](https://api.met.no/weatherapi/locationforecast/2.0/documentation), create a plot of the data in a suitable size for the e-ink display and show the image on the display.
 
