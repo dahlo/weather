@@ -41,7 +41,7 @@ data = data[1:26,]
 png(file=outfile, width=outfile_dim_x, height=outfile_dim_y)
 
 # init surface
-par(mar=c(1.5,1.7,1.3,1))
+par(mar=c(1.5,2.1,1.3,1))
 
 # plot the precipitation
 barplot(data$rain, xlab='', ylab='', bty='n', ylim=c(0, 3), axes=F, border=FALSE, col='#888888')
@@ -65,7 +65,7 @@ axis(side=1, at=xat, labels=xlabels, lwd=3, lend=1, cex.axis=1, padj=-0.8)
 # plot the Y axis
 yat = c(min(data$temperature)-(max(data$temperature)-min(data$temperature))*0.248, as.integer(seq(min(data$temperature), max(data$temperature), length.out=3)), max(data$temperature))
 ylabels = c("", as.integer(seq(min(data$temperature), max(data$temperature), length.out=3)), "")
-axis(side=2, at=yat, labels=ylabels, lwd=3, lend=1, cex.axis=1, padj=0.5, las=1, hadj=0.63)
+axis(side=2, at=yat, labels=ylabels, lwd=3, lwd.ticks=-1, lend=1, cex.axis=1.8, padj=0.5, las=1, hadj=0.63)
 
 
 
